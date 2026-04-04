@@ -7,7 +7,12 @@ import json
 
 
 def extract_data():
-    loan_data = spark.read.option("header", True).csv("loan.csv")
+    loan_data = spark.read \
+        .option("header", True) \
+        .option("quote", '"') \
+        .option("escape", '"') \
+        .option("multiLine", True) \
+        .csv("loan.csv")
 
     columns_selected = ['id',
                     'member_id',
