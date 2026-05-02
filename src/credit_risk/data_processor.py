@@ -73,8 +73,8 @@ class DataProcessor:
         df_validation_val = pd.concat([X_val_val, y_val_val], axis=1)
         df_validation_test = pd.concat([X_val_test, y_val_test], axis=1)
 
-        df_test = df_test[[final_features] + [target]]
-        df_train = df_train[[final_features] + [target]]
+        df_test = df_test[final_features + [target]]
+        df_train = df_train[final_features + [target]]
 
         return df_train, df_validation_val, df_validation_test, df_test
 
