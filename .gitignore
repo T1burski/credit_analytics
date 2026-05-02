@@ -1,2 +1,7 @@
 credit_analytics_service_acc.json
 credit_env
+loan.csv
+.env
+.databricks
+.venv
+.vscode
