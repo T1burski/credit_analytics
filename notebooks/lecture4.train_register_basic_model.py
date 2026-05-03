@@ -6,8 +6,8 @@ import mlflow
 from dotenv import load_dotenv
 from pyspark.sql import SparkSession
 
-from marvel_characters.config import ProjectConfig, Tags
-from marvel_characters.models.basic_model import BasicModel
+from credit_risk.config import ProjectConfig, Tags
+from credit_risk.models.basic_model import BasicModel
 import os
 
 
@@ -26,7 +26,7 @@ if not is_databricks():
     mlflow.set_registry_uri(f"databricks-uc://{profile}")
 
 
-config = ProjectConfig.from_yaml(config_path="../project_config_marvel.yml", env="dev")
+config = ProjectConfig.from_yaml(config_path="../project_config_credit.yml", env="dev")
 spark = SparkSession.builder.getOrCreate()
 tags = Tags(**{"git_sha": "abcd12345", "branch": "main"})
 
@@ -51,11 +51,6 @@ logged_model = mlflow.get_logged_model(basic_model.model_info.model_id)
 model = mlflow.sklearn.load_model(f"models:/{basic_model.model_info.model_id}")
 
 # COMMAND ----------
-logged_model_dict = logged_model.to_dictionary()
-logged_model_dict["metrics"] = [x.__dict__ for x in logged_model_dict["metrics"]]
-with open("../demo_artifacts/logged_model.json", "w") as json_file:
-    json.dump(logged_model_dict, json_file, indent=4)
-# COMMAND ----------
 logged_model.params
 # COMMAND ----------
 logged_model.metrics
@@ -65,7 +60,7 @@ run_id = mlflow.search_runs(
     experiment_names=["/Shared/marvel-characters-basic"], filter_string="tags.git_sha='abcd12345'"
 ).run_id[0]
 
-model = mlflow.sklearn.load_model(f"runs:/{run_id}/lightgbm-pipeline-model")
+model = mlflow.sklearn.load_model(f"runs:/{run_id}/pd-model")
 
 # COMMAND ----------
 run = mlflow.get_run(basic_model.run_id)
