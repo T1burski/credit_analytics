@@ -139,7 +139,8 @@ class BasicModel:
 
         drop_cats = []
         for feat, cats in zip(self.final_features, enc_temp.categories_):
-            ref = self.reference_categories[feat]
+            ref = self.reference_categories[feat]   
+
             if ref not in cats:
                 raise ValueError(
                     f"\nReference mismatch for '{feat}'."

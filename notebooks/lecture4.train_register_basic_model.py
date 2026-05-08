@@ -38,7 +38,7 @@ basic_model = BasicModel(config=config,
 
 # COMMAND ----------
 basic_model.load_data()
-basic_model.prepare_features()
+basic_model.prepare_model_features()
 
 # COMMAND ----------
 basic_model.train()
