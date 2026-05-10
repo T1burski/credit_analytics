@@ -201,13 +201,21 @@ class BasicModel:
                 self.platt_scaler = platt_scaler
                 self.features     = features
 
-            def predict(self, context, model_input):
+            def predict_proba(self, context, model_input):
                 X_raw     = model_input[self.features].astype(str)
                 raw_proba = self.pipeline.predict_proba(X_raw)[:, 1]
                 cal_proba = self.platt_scaler.predict_proba(
                     raw_proba.reshape(-1, 1)
                 )[:, 1]
                 return cal_proba
+            
+            def predict(self, context, model_input, threshold = 0.5):
+                X_raw     = model_input[self.features].astype(str)
+                raw_proba = self.pipeline.predict_proba(X_raw)[:, 1]
+                cal_proba = self.platt_scaler.predict_proba(
+                    raw_proba.reshape(-1, 1)
+                )[:, 1]
+                return np.where(cal_proba >= threshold, 1, 0)
             
         def compute_ks(y_true, y_proba):
             bads  = y_proba[y_true == 1]
