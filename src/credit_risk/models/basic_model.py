@@ -65,10 +65,10 @@ class BasicModel:
         self.train_set = self.train_set_spark.toPandas()
 
         self.validation_val_set_spark = self.spark.table(f"{self.catalog_name}.{self.schema_name}.validation_val_set")
-        self.validation_val_set = self.train_set_spark.toPandas()
+        self.validation_val_set = self.validation_val_set_spark.toPandas()
 
         self.validation_test_set_spark = self.spark.table(f"{self.catalog_name}.{self.schema_name}.validation_test_set")
-        self.validation_test_set = self.train_set_spark.toPandas()
+        self.validation_test_set = self.validation_test_set_spark.toPandas()
 
         self.test_set_spark = self.spark.table(f"{self.catalog_name}.{self.schema_name}.test_set")
         self.test_set =  self.test_set_spark.toPandas()
