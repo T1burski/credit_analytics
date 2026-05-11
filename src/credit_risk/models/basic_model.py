@@ -440,12 +440,12 @@ class BasicModel:
             self.model_info = mlflow.pyfunc.log_model(
                 python_model=self.calibrated_model,
                 artifact_path="pd-model", #"lightgbm-pipeline-model"
-                pip_requirements = [
-                        'scikit-learn==1.4.2',
-                        'pandas',
-                        'numpy',
-                        'scipy'
-                        ],
+                # pip_requirements = [
+                #         'scikit-learn==1.4.2',
+                #         'pandas',
+                #         'numpy',
+                #         'scipy'
+                #         ],
                 input_example=self.X_validation_test[0:1]
             )
 

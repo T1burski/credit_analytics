@@ -3,8 +3,8 @@
 import mlflow
 from pyspark.sql import SparkSession
 
-from marvel_characters.config import ProjectConfig, Tags
-from marvel_characters.models.custom_model import MarvelModelWrapper
+from credit_risk.config import ProjectConfig, Tags
+from credit_risk.models.custom_model import CreditModelWrapper
 from importlib.metadata import version
 from dotenv import load_dotenv
 from mlflow import MlflowClient
@@ -25,27 +25,27 @@ if not is_databricks():
     mlflow.set_registry_uri(f"databricks-uc://{profile}")
 
 
-config = ProjectConfig.from_yaml(config_path="../project_config_marvel.yml", env="dev")
+config = ProjectConfig.from_yaml(config_path="../project_config_credit.yml", env="dev")
 spark = SparkSession.builder.getOrCreate()
 tags = Tags(**{"git_sha": "abcd12345", "branch": "main"})
-marvel_characters_v = version("marvel_characters")
+credit_risk_v = version("credit_risk")
 
-code_paths=[f"../dist/marvel_characters-{marvel_characters_v}-py3-none-any.whl"]
+code_paths=[f"../dist/credit_risk-{credit_risk_v}-py3-none-any.whl"]
 
 # COMMAND ----------
 client = MlflowClient()
 wrapped_model_version = client.get_model_version_by_alias(
-    name=f"{config.catalog_name}.{config.schema_name}.marvel_character_model_basic",
+    name=f"{config.catalog_name}.{config.schema_name}.credit_risk_model_basic",
     alias="latest-model")
 # Initialize model with the config path
 
 # COMMAND ----------
 test_set = spark.table(f"{config.catalog_name}.{config.schema_name}.test_set").toPandas()
-X_test = test_set[config.num_features + config.cat_features]
+X_test = test_set[config.final_features]
 
 # COMMAND ----------
-pyfunc_model_name = f"{config.catalog_name}.{config.schema_name}.marvel_character_model_custom"
-wrapper = MarvelModelWrapper()
+pyfunc_model_name = f"{config.catalog_name}.{config.schema_name}.credit_risk_model_custom"
+wrapper = CreditModelWrapper()
 wrapper.log_register_model(wrapped_model_uri=f"models:/{wrapped_model_version.model_id}",
                            pyfunc_model_name=pyfunc_model_name,
                            experiment_name=config.experiment_name_custom,

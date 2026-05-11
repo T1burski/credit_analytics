@@ -56,13 +56,6 @@ logged_model.params
 logged_model.metrics
 
 # COMMAND ----------
-run_id = mlflow.search_runs(
-    experiment_names=["/Shared/marvel-characters-basic"], filter_string="tags.git_sha='abcd12345'"
-).run_id[0]
-
-model = mlflow.sklearn.load_model(f"runs:/{run_id}/pd-model")
-
-# COMMAND ----------
 run = mlflow.get_run(basic_model.run_id)
 
 # COMMAND ----------
