@@ -93,7 +93,7 @@ class BasicModel:
         self.train_data_version = str(train_delta_table.history().select("version").first()[0])
 
         test_delta_table = DeltaTable.forName(self.spark,
-                                               f"{self.catalog_name}.{self.schema_name}.test_set")
+                                               f"{self.catalog_name}.{self.schema_name}.validation_test_set")
         self.test_data_version = str(test_delta_table.history().select("version").first()[0])
 
 
@@ -431,8 +431,8 @@ class BasicModel:
             mlflow.log_input(train_dataset, context="training")
 
             test_dataset = mlflow.data.from_spark(
-                self.test_set_spark,
-                table_name=f"{self.catalog_name}.{self.schema_name}.test_set",
+                self.validation_test_set_spark,
+                table_name=f"{self.catalog_name}.{self.schema_name}.validation_test_set",
                 version=self.test_data_version,
             )
             mlflow.log_input(test_dataset, context="testing")
@@ -446,11 +446,11 @@ class BasicModel:
                         'numpy',
                         'scipy'
                         ],
-                input_example=self.X_test[0:1]
+                input_example=self.X_validation_test[0:1]
             )
 
-            eval_data = self.X_test.copy()
-            eval_data[self.target] = self.y_test
+            eval_data = self.X_validation_test.copy()
+            eval_data[self.target] = self.y_validation_test
 
             result = mlflow.models.evaluate(
                     self.model_info.model_uri,
