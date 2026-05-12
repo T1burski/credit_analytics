@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from mlflow import MlflowClient
 from mlflow.pyfunc import PythonModelContext
+from mlflow.models import infer_signature
 from mlflow.utils.environment import _mlflow_conda_env
 
 from credit_risk.config import Tags
@@ -18,7 +19,7 @@ class CreditModelWrapper(mlflow.pyfunc.PythonModel):
 
     def predict(self, context: PythonModelContext, model_input: pd.DataFrame | np.ndarray) -> dict:
         predictions = self.model.predict_proba(model_input)
-        return predictions
+        return {"Probability of Default": [round(pred, 3) for pred in predictions]}
 
     def log_register_model(self, wrapped_model_uri: str, pyfunc_model_name: str,
                            experiment_name: str, tags: Tags, code_paths: list[str],
@@ -34,15 +35,16 @@ class CreditModelWrapper(mlflow.pyfunc.PythonModel):
                 additional_pip_deps.append(f"code/{whl_name}")
 
             conda_env = _mlflow_conda_env(additional_pip_deps=additional_pip_deps)
-            
+
+            signature = infer_signature(model_input=input_example, model_output={"Probability of Default": [0.112]})
             model_info = mlflow.pyfunc.log_model(
                 python_model=self,
                 name="pyfunc-wrapper",
                 artifacts={
                     "pd-pipeline": wrapped_model_uri},
                 code_paths=code_paths,
-                conda_env=conda_env,
-                input_example=input_example[0:1]
+                signature=signature,
+                conda_env=conda_env
             )
 
         client = MlflowClient()
