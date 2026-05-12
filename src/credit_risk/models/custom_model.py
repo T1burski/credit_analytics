@@ -18,7 +18,7 @@ class CreditModelWrapper(mlflow.pyfunc.PythonModel):
         )
 
     def predict(self, context: PythonModelContext, model_input: pd.DataFrame | np.ndarray) -> dict:
-        predictions = self.model.predict_proba(model_input)
+        predictions = self.model.predict(model_input)
         return {"Probability of Default": [round(pred, 3) for pred in predictions]}
 
     def log_register_model(self, wrapped_model_uri: str, pyfunc_model_name: str,

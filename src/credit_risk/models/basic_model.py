@@ -201,21 +201,13 @@ class BasicModel:
                 self.platt_scaler = platt_scaler
                 self.features     = features
 
-            def predict_proba(self, context, model_input):
+            def predict(self, context, model_input):
                 X_raw     = model_input[self.features].astype(str)
                 raw_proba = self.pipeline.predict_proba(X_raw)[:, 1]
                 cal_proba = self.platt_scaler.predict_proba(
                     raw_proba.reshape(-1, 1)
                 )[:, 1]
                 return cal_proba
-            
-            def predict(self, context, model_input, threshold = 0.5):
-                X_raw     = model_input[self.features].astype(str)
-                raw_proba = self.pipeline.predict_proba(X_raw)[:, 1]
-                cal_proba = self.platt_scaler.predict_proba(
-                    raw_proba.reshape(-1, 1)
-                )[:, 1]
-                return np.where(cal_proba >= threshold, 1, 0)
             
         def compute_ks(y_true, y_proba):
             bads  = y_proba[y_true == 1]
@@ -443,6 +435,19 @@ class BasicModel:
                 input_example=self.X_validation_test[0:1]
             )
 
+            def roc_auc_from_proba(eval_df):
+                y_true  = eval_df["label"].values
+                y_score = eval_df["prediction"].values
+                return mlflow.models.MetricValue(
+                    aggregate_results={"roc_auc": round(roc_auc_score(y_true, y_score), 4)}
+                )
+
+            roc_auc_metric = mlflow.models.make_metric(
+                eval_fn=roc_auc_from_proba,
+                greater_is_better=True,
+                name="roc_auc",
+            )
+
             eval_data = self.X_validation_test.copy()
             eval_data[self.target] = self.y_validation_test
 
@@ -451,7 +456,8 @@ class BasicModel:
                     eval_data,
                     targets=self.target,
                     model_type="classifier",
-                    evaluators=["default"],
+                    evaluators=[],
+                    extra_metrics=[roc_auc_metric]
                 )
             
             self.metrics = result.metrics
