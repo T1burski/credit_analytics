@@ -434,57 +434,35 @@ class BasicModel:
                 artifact_path="pd-model",
                 input_example=self.X_validation_test[0:1]
             )
-
-            def roc_auc_from_proba(eval_df):
-                y_true  = eval_df["label"].values
-                y_score = eval_df["prediction"].values
-                return mlflow.models.MetricValue(
-                    aggregate_results={"roc_auc": round(roc_auc_score(y_true, y_score), 4)}
-                )
-
-            roc_auc_metric = mlflow.models.make_metric(
-                eval_fn=roc_auc_from_proba,
-                greater_is_better=True,
-                name="roc_auc",
-            )
-
-            eval_data = self.X_validation_test.copy()
-            eval_data[self.target] = self.y_validation_test
-
-            result = mlflow.models.evaluate(
-                    self.model_info.model_uri,
-                    eval_data,
-                    targets=self.target,
-                    model_type="classifier",
-                    evaluators=[],
-                    extra_metrics=[roc_auc_metric]
-                )
             
-            self.metrics = result.metrics
+            self.ks_metric = val_ks
 
     def model_improved(self) -> bool:
         """Evaluate the model performance on the test set.
 
-        Compares the current model with the latest registered model using F1-score.
+        Compares the current model with the latest registered model using KS.
         :return: True if the current model performs better, False otherwise.
         """
+
+        def compute_ks(y_true, y_proba):
+            bads  = y_proba[y_true == 1]
+            goods = y_proba[y_true == 0]
+            ks_stat, _ = ks_2samp(bads, goods)
+            return round(ks_stat, 4)
+
         client = MlflowClient()
         old_model_version = client.get_model_version_by_alias(
             name=self.model_name,
             alias="latest-model")
 
         model_uri = f"models:/{old_model_version.model_id}"
-        result = mlflow.models.evaluate(
-                model_uri,
-                self.eval_data,
-                targets=self.config.target,
-                model_type="classifier",
-                evaluators=["default"],
-            )
-        
-        metrics_old = result.metrics
 
-        if self.metrics["roc_auc"] >= metrics_old["roc_auc"]:
+        old_model = mlflow.pyfunc.load_model(model_uri)
+        y_pred_proba_old = old_model.predict(self.X_validation_test)
+
+        ks_metric_old = compute_ks(self.y_validation_test, y_pred_proba_old)
+
+        if self.ks_metric >= ks_metric_old:
             logger.info("Current model performs better. Returning True.")
             return True
         else:
