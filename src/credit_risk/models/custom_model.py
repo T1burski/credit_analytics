@@ -12,7 +12,7 @@ from credit_risk.config import Tags
 class CreditModelWrapper(mlflow.pyfunc.PythonModel):
 
     def load_context(self, context: PythonModelContext) -> None:
-        self.model = mlflow.sklearn.load_model(
+        self.model = mlflow.pyfunc.load_model(
             context.artifacts["pd-pipeline"]
         )
 
@@ -42,6 +42,7 @@ class CreditModelWrapper(mlflow.pyfunc.PythonModel):
                     "pd-pipeline": wrapped_model_uri},
                 code_paths=code_paths,
                 conda_env=conda_env,
+                input_example=input_example[0:1]
             )
 
         client = MlflowClient()
