@@ -12,9 +12,9 @@ from pyspark.dbutils import DBUtils
 from pyspark.sql import SparkSession
 from mlflow import mlflow
 
-from marvel_characters.config import ProjectConfig
-from marvel_characters.serving.model_serving import ModelServing
-from marvel_characters.utils import is_databricks
+from credit_risk.config import ProjectConfig
+from credit_risk.serving.model_serving import ModelServing
+from credit_risk.utils import is_databricks
 
 # COMMAND ----------
 # spark session
@@ -36,14 +36,14 @@ else:
     mlflow.set_registry_uri(f"databricks-uc://{profile}")
 
 # Load project config
-config = ProjectConfig.from_yaml(config_path="../project_config_marvel.yml", env="dev")
+config = ProjectConfig.from_yaml(config_path="../project_config_credit.yml", env="dev")
 catalog_name = config.catalog_name
 schema_name = config.schema_name
 
 # COMMAND ----------
 # Initialize model serving
 model_serving = ModelServing(
-    model_name=f"{catalog_name}.{schema_name}.marvel_character_model_custom", endpoint_name="marvel-character-model-serving"
+    model_name=f"{catalog_name}.{schema_name}.credit_risk_model_custom", endpoint_name="credit-risk-model-serving"
 )
 
 # COMMAND ----------
@@ -53,42 +53,17 @@ model_serving.deploy_or_update_serving_endpoint()
 
 # COMMAND ----------
 # Create a sample request body
-required_columns = [
-    "Height",
-    "Weight",
-    "Universe",
-    "Identity",
-    "Gender",
-    "Marital_Status",
-    "Teams",
-    "Origin",
-    "Creators",
-]
-
+required_columns = config.final_features
 
 # Sample 1000 records from the training set
 test_set = spark.table(f"{config.catalog_name}.{config.schema_name}.test_set").toPandas()
 
 # Sample 100 records from the training set
-sampled_records = test_set[required_columns].sample(n=18000, replace=True).to_dict(orient="records")
+sampled_records = test_set[required_columns].sample(n=2000, replace=True).to_dict(orient="records")
 dataframe_records = [[record] for record in sampled_records]
 
 # COMMAND ----------
 # Call the endpoint with one sample record
-
-"""
-Each dataframe record in the request body should be list of json with columns looking like:
-
-[{'Height': 1.75,
-  'Weight': 70.0,
-  'Universe': 'Earth-616',
-  'Identity': 'Public',
-  'Gender': 'Male',
-  'Marital_Status': 'Single',
-  'Teams': 'Avengers',
-  'Origin': 'Human',
-  'Creators': 'Stan Lee'}]
-"""
 
 def call_endpoint(record):
     """
@@ -101,7 +76,7 @@ def call_endpoint(record):
         print(f"Warning: DBR_HOST '{host}' may be incomplete. Adding '.com' domain suffix.")
         host = f"{host}.com"
         
-    serving_endpoint = f"https://{host}/serving-endpoints/marvel-character-model-serving/invocations"
+    serving_endpoint = f"https://{host}/serving-endpoints/credit-risk-model-serving/invocations"
     
     print(f"Calling endpoint: {serving_endpoint}")
     
