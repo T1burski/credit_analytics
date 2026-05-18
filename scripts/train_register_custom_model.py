@@ -47,7 +47,7 @@ basic_model.load_data()
 logger.info("Credit data loaded.")
 
 # Prepare features
-basic_model.prepare_features()
+basic_model.prepare_model_features()
 
 basic_model.train()
 logger.info("Credit model training completed.")
