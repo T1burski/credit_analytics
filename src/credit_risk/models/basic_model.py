@@ -17,6 +17,7 @@ from sklearn.metrics import roc_auc_score, roc_curve
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.utils.validation import check_is_fitted
+from mlflow.exceptions import MlflowException
 
 from credit_risk.config import ProjectConfig, Tags
 
@@ -418,7 +419,19 @@ class BasicModel:
             return round(ks_stat, 4)
 
         client = MlflowClient()
-        old_model_version = client.get_model_version_by_alias(name=self.model_name, alias="latest-model")
+
+        try:
+            old_model_version = client.get_model_version_by_alias(
+                name=self.model_name,
+                alias="latest-model"
+            )
+
+        except MlflowException:
+            logger.info(
+                "No previous registered model found. "
+                "Assuming current model is the first model."
+            )
+            return True
 
         model_uri = f"models:/{old_model_version.model_id}"
 
