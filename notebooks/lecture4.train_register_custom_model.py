@@ -61,5 +61,3 @@ unwraped_model = loaded_pufunc_model.unwrap_python_model()
 
 # COMMAND ----------
 unwraped_model.predict(context=None, model_input=X_test[0:1])
-# COMMAND ----------
-# another predict function with uri

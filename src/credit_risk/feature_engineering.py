@@ -6,7 +6,7 @@ from pyspark.sql import functions as F
 
 def feature_engineering(df_raw):
 
-    median_annual_inc = float(62500)
+    median_annual_inc = float(62500) #value defined in EDA using training data. Will be considered as constant until new analysis.
 
     df = df_raw.withColumn('earliest_cr_line_date',
                     F.to_date(F.col('earliest_cr_line'), 'MMM-yyyy'))

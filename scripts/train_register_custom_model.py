@@ -40,25 +40,20 @@ dbutils = DBUtils(spark)
 tags_dict = {"git_sha": args.git_sha, "branch": args.branch, "job_run_id": args.job_run_id}
 tags = Tags(**tags_dict)
 
-# Initialize Marvel custom model
 basic_model = BasicModel(config=config, tags=tags, spark=spark)
 logger.info("Credit BasicModel initialized.")
 
-# Load Marvel data
 basic_model.load_data()
 logger.info("Credit data loaded.")
 
 # Prepare features
 basic_model.prepare_features()
 
-# Train the Marvel model
 basic_model.train()
 logger.info("Credit model training completed.")
 
-# Train the Marvel model
 basic_model.log_model()
 
-# Evaluate Marvel model
 model_improved = basic_model.model_improved()
 logger.info("Credit risk model evaluation completed. Model improved: %s", model_improved)
 

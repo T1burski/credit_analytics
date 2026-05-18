@@ -1,5 +1,5 @@
 # Databricks notebook source
-# MAGIC %pip install marvel_characters-1.0.1-py3-none-any.whl
+# MAGIC %pip install credit_risk-1.0.1-py3-none-any.whl
 
 # COMMAND ----------
 # MAGIC %restart_python
@@ -55,10 +55,8 @@ model_serving.deploy_or_update_serving_endpoint()
 # Create a sample request body
 required_columns = config.final_features
 
-# Sample 1000 records from the training set
 test_set = spark.table(f"{config.catalog_name}.{config.schema_name}.test_set").toPandas()
 
-# Sample 100 records from the training set
 sampled_records = test_set[required_columns].sample(n=2000, replace=True).to_dict(orient="records")
 dataframe_records = [[record] for record in sampled_records]
 

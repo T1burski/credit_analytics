@@ -24,7 +24,6 @@ logger.info(yaml.dump(config, default_flow_style=False))
 
 # COMMAND ----------
 
-# Load the Marvel characters dataset
 spark = SparkSession.builder.getOrCreate()
 
 # Load the data
@@ -34,7 +33,7 @@ df = spark.table("bigquery_credit_analytics_catalog.credit_analytics.loan_data")
 logger.info(f"Dataset size: {df.count()}")
 
 # COMMAND ----------
-# Load the Marvel characters dataset
+
 data_processor = DataProcessor(df, config, spark)
 
 # Preprocess the data

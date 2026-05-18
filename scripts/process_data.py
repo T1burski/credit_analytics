@@ -38,8 +38,6 @@ spark = SparkSession.builder.getOrCreate()
 
 df = spark.table("bigquery_credit_analytics_catalog.credit_analytics.loan_data")
 
-# If you have Marvel-specific synthetic/test data generation, use them here.
-# Otherwise, just use the loaded Marvel dataset as is.
 logger.info("Credit data loaded for processing.")
 
 # Initialize DataProcessor

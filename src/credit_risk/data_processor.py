@@ -1,19 +1,17 @@
-"""Data preprocessing module for Marvel characters."""
+"""Data preprocessing module for Credit risk."""
 
 import time
-
 import numpy as np
 import pandas as pd
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 from pyspark.sql.functions import current_timestamp, to_utc_timestamp
 from sklearn.model_selection import train_test_split
-
 from credit_risk.config import ProjectConfig
 from credit_risk.feature_engineering import feature_engineering
 
 class DataProcessor:
-    """A class for preprocessing and managing Marvel character DataFrame operations.
+    """A class for preprocessing and managing Credit risk data operations.
 
     This class handles data preprocessing, splitting, and saving to Databricks tables.
     """
@@ -25,7 +23,7 @@ class DataProcessor:
 
 
     def preprocess(self) -> None:
-        """Preprocess the Marvel character DataFrame stored in self.df.
+        """Preprocess the Credit risk data stored in self.df.
 
         This method handles missing values, converts data types, and performs feature engineering.
         """

@@ -40,12 +40,10 @@ catalog_name = config.catalog_name
 schema_name = config.schema_name
 endpoint_name = "credit-risk-model-serving"
 
-# Initialize Marvel Model Serving Manager
 model_serving = ModelServing(
     model_name=f"{catalog_name}.{schema_name}.credit_risk_model_custom",
     endpoint_name=endpoint_name
 )
 
-# Deploy the Marvel model serving endpoint
 model_serving.deploy_or_update_serving_endpoint(version=model_version)
 logger.info("Started deployment/update of the Credit risk model serving endpoint.")

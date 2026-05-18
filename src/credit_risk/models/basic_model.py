@@ -1,10 +1,4 @@
-"""Basic model implementation for Marvel character classification.
-
-num_features → List of numerical feature names.
-cat_features → List of categorical feature names.
-target → The column to predict (Alive).
-parameters → Hyperparameters for LightGBM.
-catalog_name, schema_name → Database schema names for Databricks tables.
+"""Basic model implementation for Credit Risk.
 """
 
 import mlflow
@@ -15,22 +9,21 @@ from delta.tables import DeltaTable
 from loguru import logger
 from mlflow import MlflowClient
 from pyspark.sql import SparkSession
-from sklearn.base import BaseEstimator, TransformerMixin, ClassifierMixin
-from sklearn.compose import ColumnTransformer
+from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LogisticRegression
 from sklearn.utils.validation import check_is_fitted
 from sklearn.preprocessing import OneHotEncoder
-from sklearn.metrics import roc_curve, auc, roc_auc_score
+from sklearn.metrics import roc_curve, roc_auc_score
 from scipy.stats import ks_2samp
 import matplotlib.pyplot as plt
-from sklearn.calibration import calibration_curve, CalibratedClassifierCV
+from sklearn.calibration import calibration_curve
 
 from credit_risk.config import ProjectConfig, Tags
 
 
 class BasicModel:
-    """A basic model class for Marvel character survival prediction using LightGBM.
+    """A basic model class for Probability of Default prediction using Logistic Regression with Platt probability calibration.
 
     This class handles data loading, feature preparation, model training, and MLflow logging.
     """
@@ -102,8 +95,7 @@ class BasicModel:
     def prepare_model_features(self) -> None:
         """Encode categorical features and define a preprocessing pipeline.
 
-        Creates a ColumnTransformer for one-hot encoding categorical features while passing through numerical
-        features. Constructs a pipeline combining preprocessing and LightGBM classification model.
+        Constructs a pipeline combining preprocessing and Logistic Regression classification model.
         """
         logger.info("🔄 Defining preprocessing pipeline...")
 
@@ -149,7 +141,7 @@ class BasicModel:
                 )
             drop_cats.append(ref)
 
-        # ── 3. Build and fit sklearn pipeline ─────────────────────────
+        # ── Build and fit sklearn pipeline ─────────────────────────
         self.pipeline = Pipeline(steps=[
             ('encoder', OneHotEncoder(
                 drop=drop_cats,
@@ -390,24 +382,24 @@ class BasicModel:
             coef_df = build_coefficient_table(self.pipeline, self.final_features)
             mlflow.log_text(coef_df.to_csv(index=False), 'model_diagnostics/coefficients.csv')
 
-            # ── 8. ROC plot ───────────────────────────────────────────
+            # ── ROC plot ───────────────────────────────────────────
             fig_roc = plot_roc_curve(self.y_validation_test, self.y_validation_test_proba_cal)
             mlflow.log_figure(fig_roc, 'model_diagnostics/roc_curve_validation.png')
             plt.close(fig_roc)
 
-            # ── 9. KS plot ────────────────────────────────────────────
+            # ── KS plot ────────────────────────────────────────────
             fig_ks = plot_ks_curve(self.y_validation_test, self.y_validation_test_proba_cal)
             mlflow.log_figure(fig_ks, 'model_diagnostics/ks_curve_validation.png')
             plt.close(fig_ks)
 
-            # ── 10. Calibration plot ──────────────────────────────────
+            # ── Calibration plot ──────────────────────────────────
             fig_cal, ece_raw, ece_cal = plot_calibration_curve(self.y_validation_test, self.y_validation_test_proba_raw, self.y_validation_test_proba_cal)
             mlflow.log_figure(fig_cal, 'model_diagnostics/calibration_curve_validation.png')
             plt.close(fig_cal)
             mlflow.log_metric('val_ece_raw', round(ece_raw, 6))
             mlflow.log_metric('val_ece_cal', round(ece_cal, 6))
 
-            # ── 11. Log sklearn pipeline ──────────────────────────────
+            # ── Log sklearn pipeline ──────────────────────────────
 
             self.calibrated_model = CalibratedPDModel(
                 pipeline     = self.pipeline,

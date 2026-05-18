@@ -1,7 +1,6 @@
-"""Configuration file for the Marvel characters project."""
+"""Configuration file for the Credit risk project."""
 
 from typing import Any
-
 import yaml
 from pydantic import BaseModel
 
