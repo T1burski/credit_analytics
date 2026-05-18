@@ -6,4 +6,3 @@ loan.csv
 .venv
 .vscode
 __pycache__/
-src/*.egg-info
