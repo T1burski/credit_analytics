@@ -5,7 +5,7 @@
 
 ## Objective
 
-Build a Prediction of Default (PD) model for credit operations in order to infer their risk of default, defining a system that automatically trains the models, compares them and deploys newer models that perform better, making them available for user usage and user consumption of predictions in new operations. 
+Build a Probability of Default (PD) model for credit operations in order to infer their risk of default, defining a system that automatically trains the models, compares them and deploys newer models that perform better, making them available for user usage and user consumption of predictions in new operations.
 
 
 ## Tools and Tech Used
