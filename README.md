@@ -52,4 +52,37 @@ The final model in production had, on unseen data, a KS of 0.296 and a ROC AUC o
 <img width="1222" height="600" alt="image" src="https://github.com/user-attachments/assets/99795c78-35a3-4c66-899e-9a2a97843be0" />
 
 
+In Databricks, the training and deploying pipeline are deployed using DAB and follow the logic below:
+
+<img width="1242" height="352" alt="image" src="https://github.com/user-attachments/assets/7bcd8b6d-e1e0-485e-931f-c934ddb71620" />
+
+
+After training a new model, we check if it is performing better than the one already in production on new data. If yes, the production model is updated and deployed to the serving endpoint in Databricks.
+
+
 ## Business Usage of the Solution
+
+The final model is available to be used within Databricks (loading the model and applying predictions) directly:
+
+
+<img width="615" height="530" alt="image" src="https://github.com/user-attachments/assets/ac11fbcc-eab2-4ef7-a0b9-add9381001dd" />
+
+
+And it is also available through a deployed serving endpoint in Databricks:
+
+
+<img width="1012" height="727" alt="image" src="https://github.com/user-attachments/assets/361b38ad-ae84-4027-aa06-5584ba5334dc" />
+
+
+In order to test the deployed model in a situation likely to happen in a financial industry, a ETL was built that extracts new credit operations and applies the model in production to predict their probabilities of default.
+
+<img width="1576" height="770" alt="image" src="https://github.com/user-attachments/assets/a1b56bfe-b3cf-40b5-869b-7b8a569dd43a" />
+
+The code, which was built in a noteboos, can be found in the folder etls/. In it, the approach we had was to use the model directly to apply the predictions, and not the serving endpoint. Every attempt to connect to it to apply the prediction resulted in errors associated with deficiencies of the Free Edition of Databricks (problems regarding using APIs in notebooks, from the experience we had). The output table here (mlops_prd.dbk_credit_analytics.operations_credit_risk) had the final operations with their probability of default:
+
+<img width="1875" height="847" alt="image" src="https://github.com/user-attachments/assets/00d992ff-c1c5-471a-a8a9-850b4d98ef3f" />
+
+
+## Conclusion
+
+The model and pipelines built in Databricks, that assess the risk (probability of default) of credit operations, had satisfatory results (ROC AUC of 0.69 and KS of 0.29) considering the simplistic approaches taken here, for example number of features chosen. The model deployed in Databricks is available for the business to assess the operations' risk, with a ETL already built that automatically classifies each new operation. The training pipeline can also be ran automatically with a pre-defined frequency, and its current logic will only update the model in production if a newly trained model, on new data, outperforms the model already in production. 
